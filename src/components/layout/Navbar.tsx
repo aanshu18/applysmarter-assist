@@ -27,6 +27,7 @@ const NavItem = ({ to, icon: Icon, label, isActive }: { to: string; icon: any; l
 const Navbar = () => {
   const location = useLocation();
   const [scrolled, setScrolled] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -41,6 +42,11 @@ const Navbar = () => {
       window.removeEventListener('scroll', handleScroll);
     };
   }, [scrolled]);
+
+  // Close mobile menu when changing routes
+  useEffect(() => {
+    setMobileMenuOpen(false);
+  }, [location.pathname]);
 
   const navItems = [
     { to: '/dashboard', icon: Database, label: 'Dashboard' },
@@ -88,21 +94,68 @@ const Navbar = () => {
         </div>
 
         <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm" className="hidden md:flex">
-            <User className="h-4 w-4 mr-2" />
-            Profile
+          <Button variant="outline" size="sm" className="hidden md:flex" asChild>
+            <Link to="/resume">
+              <User className="h-4 w-4 mr-2" />
+              Profile
+            </Link>
           </Button>
           
-          <Button className="hidden md:flex">
-            <Briefcase className="h-4 w-4 mr-2" />
-            New Application
+          <Button className="hidden md:flex" asChild>
+            <Link to="/applications">
+              <Briefcase className="h-4 w-4 mr-2" />
+              New Application
+            </Link>
           </Button>
           
-          <Button variant="ghost" size="icon" className="md:hidden">
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            className="md:hidden"
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+          >
             <List className="h-5 w-5" />
           </Button>
         </div>
       </div>
+      
+      {/* Mobile menu */}
+      {mobileMenuOpen && (
+        <div className="md:hidden bg-background border-t p-4 animate-in slide-in-from-top">
+          <div className="flex flex-col space-y-1">
+            {navItems.map((item) => (
+              <Button
+                key={item.to}
+                variant="ghost"
+                size="sm"
+                asChild
+                className={cn(
+                  'justify-start',
+                  location.pathname === item.to && 'bg-primary/10 text-primary'
+                )}
+              >
+                <Link to={item.to} className="flex items-center gap-2">
+                  <item.icon className="h-4 w-4" />
+                  <span>{item.label}</span>
+                </Link>
+              </Button>
+            ))}
+            <div className="h-px bg-border my-2" />
+            <Button size="sm" variant="outline" asChild className="justify-start">
+              <Link to="/resume" className="flex items-center gap-2">
+                <User className="h-4 w-4" />
+                Profile
+              </Link>
+            </Button>
+            <Button size="sm" asChild className="justify-start">
+              <Link to="/applications" className="flex items-center gap-2">
+                <Briefcase className="h-4 w-4" />
+                New Application
+              </Link>
+            </Button>
+          </div>
+        </div>
+      )}
     </nav>
   );
 };
